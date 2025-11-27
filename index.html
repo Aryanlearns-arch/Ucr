@@ -785,4 +785,179 @@
       const middle = document.createElement("div");
       middle.innerHTML = `
         <div class="subject-name">${info.name}</div>
-        <div class="meta">${info.t
+        <div class="meta">${info.type} · ${info.subjectGroup}</div>
+      `;
+
+      const right = document.createElement("div");
+      const btn = document.createElement("button");
+      btn.className = "status-btn";
+
+      let status = getStatus(dateISO, slot);
+      applyStatusButtonStyle(btn, status);
+
+      btn.addEventListener("click", () => {
+        status = nextStatus(status);
+        setStatus(dateISO, slot, status);
+        applyStatusButtonStyle(btn, status);
+        buildAttendanceReport();
+      });
+
+      right.appendChild(btn);
+
+      row.appendChild(left);
+      row.appendChild(middle);
+      row.appendChild(right);
+      routineList.appendChild(row);
+    });
+  }
+
+  function setToday() {
+    const today = new Date();
+    const iso = toISODate(today);
+    datePicker.value = iso;
+    renderRoutineFor(iso);
+    highlightWeekday(weekdayFromISO(iso));
+  }
+
+  function highlightWeekday(weekday) {
+    weekdayButtons.forEach(btn => {
+      const w = btn.getAttribute("data-weekday");
+      btn.classList.toggle("active", w === weekday);
+    });
+  }
+
+  /*************************************************
+   * 6. EDITOR: WEEKLY ROUTINE
+   *************************************************/
+  const editWeekday = document.getElementById("editWeekday");
+  const startTime = document.getElementById("startTime");
+  const endTime = document.getElementById("endTime");
+  const addClassBtn = document.getElementById("addClassBtn");
+  const editorList = document.getElementById("editorList");
+
+  function renderEditorList() {
+    const day = editWeekday.value;
+    const list = weeklyRoutine[day] || [];
+    editorList.innerHTML = "";
+
+    if (!list.length) {
+      editorList.innerHTML = `<div style="color:#9ca3af;font-size:0.78rem;padding:4px;">No classes.</div>`;
+      return;
+    }
+
+    list
+      .slice()
+      .sort((a,b)=> (a.start||"") > (b.start||"") ? 1 : -1)
+      .forEach((slot, index) => {
+        const info = PAPERS[slot.paper] || { name: "Unknown", type: "" };
+        const div = document.createElement("div");
+        div.className = "editor-item";
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "editor-item-info";
+        infoDiv.innerHTML = `
+          <div>${formatTimeRange(slot.start, slot.end)} · <b>${slot.paper}</b></div>
+          <div style="color:#9ca3af;font-size:0.7rem;">${info.name}</div>
+        `;
+        const delBtn = document.createElement("button");
+        delBtn.className = "chip-danger";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", () => {
+          const arr = weeklyRoutine[day] || [];
+          arr.splice(index, 1);
+          weeklyRoutine[day] = arr;
+          saveRoutine(weeklyRoutine);
+          renderEditorList();
+          if (datePicker.value && weekdayFromISO(datePicker.value) === day) {
+            renderRoutineFor(datePicker.value);
+            buildAttendanceReport();
+          }
+        });
+
+        div.appendChild(infoDiv);
+        div.appendChild(delBtn);
+        editorList.appendChild(div);
+      });
+  }
+
+  addClassBtn.addEventListener("click", () => {
+    const day = editWeekday.value;
+    const st = startTime.value || "";
+    const et = endTime.value || "";
+    const paper = paperSelect.value;
+
+    if (!paper) return;
+
+    if (!weeklyRoutine[day]) weeklyRoutine[day] = [];
+    weeklyRoutine[day].push({ start: st, end: et, paper });
+    saveRoutine(weeklyRoutine);
+
+    startTime.value = "";
+    endTime.value = "";
+
+    renderEditorList();
+
+    if (datePicker.value && weekdayFromISO(datePicker.value) === day) {
+      renderRoutineFor(datePicker.value);
+    }
+  });
+
+  editWeekday.addEventListener("change", renderEditorList);
+
+  /*************************************************
+   * 7. WEEKDAY BUTTONS: CURRENT WEEK
+   *************************************************/
+  function mondayOfCurrentWeek(refDate) {
+    const d = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
+    const day = d.getDay();
+    const diff = (day + 6) % 7;
+    d.setDate(d.getDate() - diff);
+    return d;
+  }
+
+  const WEEKDAY_INDEX = {
+    "Monday": 0,
+    "Tuesday": 1,
+    "Wednesday": 2,
+    "Thursday": 3,
+    "Friday": 4,
+    "Saturday": 5
+  };
+
+  weekdayButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const w = btn.getAttribute("data-weekday");
+      const today = new Date();
+      const monday = mondayOfCurrentWeek(today);
+      const offset = WEEKDAY_INDEX[w] ?? 0;
+      monday.setDate(monday.getDate() + offset);
+      const iso = toISODate(monday);
+      datePicker.value = iso;
+      renderRoutineFor(iso);
+      highlightWeekday(w);
+    });
+  });
+
+  /*************************************************
+   * 8. INIT + EVENTS
+   *************************************************/
+  document.addEventListener("DOMContentLoaded", () => {
+    renderSubjectCards();
+    setToday();
+    renderEditorList();
+    buildAttendanceReport();
+  });
+
+  datePicker.addEventListener("change", () => {
+    const iso = datePicker.value;
+    if (!iso) return;
+    renderRoutineFor(iso);
+    highlightWeekday(weekdayFromISO(iso));
+  });
+
+  todayBtn.addEventListener("click", () => {
+    setToday();
+    buildAttendanceReport();
+  });
+</script>
+</body>
+</html>
