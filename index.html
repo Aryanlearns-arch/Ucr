@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sem 3 · Routine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #020617;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      padding: 16px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 18px;
+      padding: 16px 14px 20px;
+      border: 1px solid rgba(148,163,184,0.35);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.02em;
+    }
+
+    .tagline {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,140,248,0.8);
+      background: radial-gradient(circle at top left, rgba(129,140,248,0.18), transparent);
+      color: #c7d2fe;
+      white-space: nowrap;
+    }
+
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    input[type="date"],
+    select,
+    input[type="time"] {
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+    input:focus, select:focus {
+      outline: 1px solid #6366f1;
+    }
+
+    .btn {
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: #6366f1; }
+
+    .weekday-chip {
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    .weekday-buttons {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 6px;
+      padding-bottom: 4px;
+      margin-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .weekday-btn {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      font-size: 0.76rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    .weekday-btn.active {
+      border-color: #6366f1;
+      background: rgba(79,70,229,0.25);
+      color: #e5e7eb;
+    }
+
+    .section-title {
+      margin: 4px 0 4px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-sub {
+      font-size: 0.72rem;
+      color: #9ca3af;
+    }
+
+    .block-gap {
+      margin-top: 10px;
+    }
+
+    .routine-list {
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), #020617);
+      padding: 6px 4px;
+      margin-bottom: 6px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .class-row {
+      display: grid;
+      grid-template-columns: 1.2fr 2.6fr auto;
+      gap: 6px;
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(31,41,55,0.9);
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    .class-row:last-child { border-bottom: none; }
+
+    .time {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+    .paper-code {
+      font-size: 0.72rem;
+      color: #a5b4fc;
+    }
+    .subject-name {
+      font-weight: 500;
+    }
+    .meta {
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .status-btn {
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      border: 1px solid #4b5563;
+      background: #020617;
+      cursor: pointer;
+      min-width: 74px;
+      text-align: center;
+    }
+    .status-unmarked {
+      border-style: dashed;
+      color: #9ca3af;
+    }
+    .status-present {
+      background: rgba(34,197,94,0.2);
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+    .status-absent {
+      background: rgba(239,68,68,0.18);
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 10px 4px 6px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .legend {
+      font-size: 0.72rem;
+      color: #9ca3af;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 4px;
+    }
+    .dot-present { background: #22c55e; }
+    .dot-absent { background: #ef4444; }
+    .dot-unmarked { background: #6b7280; }
+
+    .subjects-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+    .subject-card {
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 7px 8px;
+      background: #020617;
+    }
+    .subject-card .code {
+      font-size: 0.72rem;
+      color: #a5b4fc;
+      margin-bottom: 2px;
+    }
+    .subject-card .name {
+      font-weight: 500;
+    }
+    .subject-card .extra {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .info-line {
+      font-size: 0.72rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .editor {
+      margin-top: 10px;
+      border-top: 1px dashed #374151;
+      padding-top: 8px;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin-bottom: 6px;
+      margin-top: 4px;
+    }
+
+    .editor-list {
+      margin-top: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 4px;
+      background: #020617;
+      font-size: 0.78rem;
+    }
+
+    .editor-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 4px;
+      border-bottom: 1px solid #111827;
+    }
+    .editor-item:last-child { border-bottom: none; }
+
+    .editor-item-info {
+      max-width: 80%;
+    }
+
+    .chip-danger {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #ef4444;
+      color: #fecaca;
+      background: rgba(239,68,68,0.15);
+      cursor: pointer;
+    }
+
+    /* Attendance report */
+    .report-container {
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 6px 6px 8px;
+      background: #020617;
+      font-size: 0.78rem;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2px;
+    }
+    .report-table th,
+    .report-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #111827;
+      text-align: left;
+    }
+    .report-table th {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    .report-table td {
+      font-size: 0.78rem;
+    }
+    .report-table tfoot td {
+      font-weight: 600;
+      border-top: 1px solid #1f2937;
+    }
+    .report-empty {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      padding: 4px 2px;
+    }
+
+    @media (max-width: 640px) {
+      .class-row {
+        grid-template-columns: 1.1fr 2.2fr auto;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <header>
+      <div>
+        <h1>Sem 3 · Routine</h1>
+        <div class="tagline">Classes & mock attendance.</div>
+      </div>
+      <div class="pill">Local · Offline</div>
+    </header>
+
+    <!-- Top controls -->
+    <div class="top-controls">
+      <div>
+        <label for="datePicker">Date</label><br />
+        <input type="date" id="datePicker" />
+      </div>
+      <div>
+        <label>&nbsp;</label><br />
+        <button class="btn" id="todayBtn">Today</button>
+      </div>
+      <div style="min-width:160px;">
+        <label>Day</label><br />
+        <div class="weekday-chip" id="summaryChip">–</div>
+      </div>
+    </div>
+
+    <!-- Weekday quick buttons -->
+    <div class="weekday-buttons">
+      <button class="weekday-btn" data-weekday="Monday">Mon</button>
+      <button class="weekday-btn" data-weekday="Tuesday">Tue</button>
+      <button class="weekday-btn" data-weekday="Wednesday">Wed</button>
+      <button class="weekday-btn" data-weekday="Thursday">Thu</button>
+      <button class="weekday-btn" data-weekday="Friday">Fri</button>
+      <button class="weekday-btn" data-weekday="Saturday">Sat</button>
+    </div>
+
+    <!-- Routine for selected date -->
+    <div class="section-title block-gap">
+      <span>Classes</span>
+      <span class="section-sub" id="routineModeLabel"></span>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot dot-present"></span>P</span>
+      <span><span class="dot dot-absent"></span>A</span>
+      <span><span class="dot dot-unmarked"></span>–</span>
+    </div>
+
+    <div class="routine-list" id="routineList"></div>
+    <div class="empty" id="emptyState" style="display:none;">
+      No classes for this day.
+    </div>
+
+    <div class="info-line">
+      Attendance here is just for you.
+    </div>
+
+    <!-- Attendance report -->
+    <div class="section-title block-gap">
+      <span>Report</span>
+      <span class="section-sub">Per paper</span>
+    </div>
+    <div class="report-container" id="reportContainer"></div>
+
+    <!-- Subject / paper mapping -->
+    <div class="section-title block-gap">
+      <span>Subjects</span>
+      <span class="section-sub">ACCG / ALEN</span>
+    </div>
+
+    <div class="subjects-grid" id="subjectsGrid"></div>
+
+    <!-- Routine editor -->
+    <div class="editor block-gap">
+      <div class="section-title">
+        <span>Routine</span>
+        <span class="section-sub">Repeats weekly</span>
+      </div>
+
+      <div class="editor-grid">
+        <div>
+          <label for="editWeekday">Day</label>
+          <select id="editWeekday">
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+          </select>
+        </div>
+        <div>
+          <label for="startTime">Start</label>
+          <input type="time" id="startTime" />
+        </div>
+        <div>
+          <label for="endTime">End</label>
+          <input type="time" id="endTime" />
+        </div>
+        <div>
+          <label for="paperSelect">Paper</label>
+          <select id="paperSelect"></select>
+        </div>
+      </div>
+
+      <button class="btn" id="addClassBtn">Add class</button>
+
+      <div class="info-line">
+        Edit here if timetable changes.
+      </div>
+
+      <div class="editor-list" id="editorList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /*************************************************
+   * 1. PAPER / SUBJECT DEFINITIONS
+   *************************************************/
+  const PAPERS = {
+    "CC3-3": {
+      name: "Cost Accounting II",
+      type: "MDC (Core)",
+      subjectGroup: "ACCG"
+    },
+    "CC4-3": {
+      name: "Direct Tax I",
+      type: "MDC (Core)",
+      subjectGroup: "ACCG"
+    },
+    "MINOR(MDC)": {
+      name: "Consumer Behaviour / Fundamentals of Computer",
+      type: "MDC Minor",
+      subjectGroup: "ACCG"
+    },
+    "IDC3": {
+      name: "Indian Economic Environment",
+      type: "IDC / MDC",
+      subjectGroup: "ACCG"
+    },
+    "AEC3": {
+      name: "MIL – 1",
+      type: "AEC",
+      subjectGroup: "ALEN"
+    },
+    "SEC3": {
+      name: "Computerized Accounting & Intro to Data Science (Practical)",
+      type: "SEC (Practical)",
+      subjectGroup: "ACCG"
+    }
+  };
+
+  const STORAGE_KEY_ROUTINE = "sem3_weekly_routine_v1";
+  const STORAGE_KEY_ATT = "sem3_mock_attendance_v1";
+
+  function loadRoutine() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_ROUTINE);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+  function saveRoutine(routine) {
+    localStorage.setItem(STORAGE_KEY_ROUTINE, JSON.stringify(routine));
+  }
+
+  let weeklyRoutine = loadRoutine();
+
+  const specialByDate = {}; // still here if you ever want to extend it
+
+  /*************************************************
+   * 2. DATE HELPERS
+   *************************************************/
+  function toISODate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  function weekdayFromISO(iso) {
+    const [y,m,d] = iso.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    return WEEKDAYS[date.getDay()];
+  }
+
+  function formatTimeRange(start, end) {
+    if (!start && !end) return "";
+    if (start && !end) return start;
+    if (!start && end) return end;
+    return `${start} – ${end}`;
+  }
+
+  function getRoutineForDate(iso) {
+    if (specialByDate[iso]) {
+      return { list: specialByDate[iso], mode: "Special" };
+    }
+    const wd = weekdayFromISO(iso);
+    const base = weeklyRoutine[wd] || [];
+    const list = base.map(slot => ({
+      time: formatTimeRange(slot.start, slot.end),
+      start: slot.start,
+      end: slot.end,
+      paper: slot.paper
+    }));
+    return { list, mode: wd };
+  }
+
+  function statusKey(date, slot) {
+    return `${date}__${slot.start || slot.time}__${slot.paper}`;
+  }
+
+  function getAttendanceMap() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_ATT);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function getStatus(date, slot) {
+    const all = getAttendanceMap();
+    return all[statusKey(date, slot)] || "unmarked";
+  }
+
+  function setStatus(date, slot, status) {
+    const key = statusKey(date, slot);
+    let all = getAttendanceMap();
+    if (status === "unmarked") {
+      delete all[key];
+    } else {
+      all[key] = status;
+    }
+    localStorage.setItem(STORAGE_KEY_ATT, JSON.stringify(all));
+  }
+
+  function nextStatus(current) {
+    if (current === "unmarked") return "present";
+    if (current === "present") return "absent";
+    return "unmarked";
+  }
+
+  function applyStatusButtonStyle(btn, status) {
+    btn.classList.remove("status-unmarked","status-present","status-absent");
+    if (status === "present") {
+      btn.textContent = "P";
+      btn.classList.add("status-present");
+    } else if (status === "absent") {
+      btn.textContent = "A";
+      btn.classList.add("status-absent");
+    } else {
+      btn.textContent = "–";
+      btn.classList.add("status-unmarked");
+    }
+  }
+
+  /*************************************************
+   * 3. SUBJECT GRID + PAPER DROPDOWN
+   *************************************************/
+  const subjectsGrid = document.getElementById("subjectsGrid");
+  const paperSelect = document.getElementById("paperSelect");
+
+  function renderSubjectCards() {
+    subjectsGrid.innerHTML = "";
+    Object.entries(PAPERS).forEach(([code, info]) => {
+      const div = document.createElement("div");
+      div.className = "subject-card";
+      div.innerHTML = `
+        <div class="code">${code}</div>
+        <div class="name">${info.name}</div>
+        <div class="extra">${info.type}</div>
+        <div class="extra">${info.subjectGroup}</div>
+      `;
+      subjectsGrid.appendChild(div);
+    });
+
+    paperSelect.innerHTML = "";
+    Object.keys(PAPERS).forEach(code => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = `${code} · ${PAPERS[code].name}`;
+      paperSelect.appendChild(opt);
+    });
+  }
+
+  /*************************************************
+   * 4. ATTENDANCE REPORT
+   *************************************************/
+  const reportContainer = document.getElementById("reportContainer");
+
+  function buildAttendanceReport() {
+    const map = getAttendanceMap();
+    const entries = Object.entries(map);
+    if (!entries.length) {
+      reportContainer.innerHTML = `<div class="report-empty">No data yet.</div>`;
+      return;
+    }
+
+    const stats = {};
+    let overallPresent = 0;
+    let overallAbsent = 0;
+
+    for (const [key, status] of entries) {
+      if (status !== "present" && status !== "absent") continue;
+      const parts = key.split("__");
+      if (parts.length !== 3) continue;
+      const paper = parts[2];
+      if (!stats[paper]) stats[paper] = { present: 0, absent: 0 };
+      stats[paper][status]++;
+      if (status === "present") overallPresent++;
+      if (status === "absent") overallAbsent++;
+    }
+
+    const paperKeys = Object.keys(stats);
+    if (!paperKeys.length) {
+      reportContainer.innerHTML = `<div class="report-empty">Only unmarked entries.</div>`;
+      return;
+    }
+
+    let html = `<table class="report-table">
+      <thead>
+        <tr>
+          <th>Paper</th>
+          <th>P</th>
+          <th>A</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+    `;
+
+    paperKeys.forEach(paper => {
+      const { present, absent } = stats[paper];
+      const total = present + absent;
+      const pct = total ? Math.round((present / total) * 100) : 0;
+      const info = PAPERS[paper];
+      const label = info ? paper : paper;
+      html += `
+        <tr>
+          <td>${label}</td>
+          <td>${present}</td>
+          <td>${absent}</td>
+          <td>${pct}%</td>
+        </tr>
+      `;
+    });
+
+    const totalClasses = overallPresent + overallAbsent;
+    const overallPct = totalClasses ? Math.round((overallPresent / totalClasses) * 100) : 0;
+
+    html += `
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td>${overallPresent}</td>
+          <td>${overallAbsent}</td>
+          <td>${overallPct}%</td>
+        </tr>
+      </tfoot>
+    </table>
+    `;
+
+    reportContainer.innerHTML = html;
+  }
+
+  /*************************************************
+   * 5. VIEW: ROUTINE + ATTENDANCE
+   *************************************************/
+  const datePicker = document.getElementById("datePicker");
+  const todayBtn = document.getElementById("todayBtn");
+  const summaryChip = document.getElementById("summaryChip");
+  const routineList = document.getElementById("routineList");
+  const emptyState = document.getElementById("emptyState");
+  const routineModeLabel = document.getElementById("routineModeLabel");
+  const weekdayButtons = document.querySelectorAll(".weekday-btn");
+
+  function renderRoutineFor(dateISO) {
+    if (!dateISO) return;
+    const wd = weekdayFromISO(dateISO);
+    const { list, mode } = getRoutineForDate(dateISO);
+
+    summaryChip.textContent = `${wd} · ${dateISO}`;
+    routineModeLabel.textContent = mode;
+
+    routineList.innerHTML = "";
+    if (!list.length) {
+      emptyState.style.display = "block";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    list.forEach(slot => {
+      const info = PAPERS[slot.paper] || { name: "Unknown", type: "", subjectGroup: "" };
+
+      const row = document.createElement("div");
+      row.className = "class-row";
+
+      const left = document.createElement("div");
+      left.innerHTML = `
+        <div class="time">${formatTimeRange(slot.start, slot.end) || slot.time}</div>
+        <div class="paper-code">${slot.paper}</div>
+      `;
+
+      const middle = document.createElement("div");
+      middle.innerHTML = `
+        <div class="subject-name">${info.name}</div>
+        <div class="meta">${info.ty
