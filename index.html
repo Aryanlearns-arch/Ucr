@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,7 +79,8 @@
 
     input[type="date"],
     select,
-    input[type="time"] {
+    input[type="time"],
+    input[type="text"] {
       padding: 6px 8px;
       border-radius: 10px;
       border: 1px solid #4b5563;
@@ -378,7 +378,7 @@
     <header>
       <div>
         <h1>Sem 3 · Routine</h1>
-        <div class="tagline">Classes & mock attendance.</div>
+        <div class="tagline">Classes, teachers & mock attendance.</div>
       </div>
       <div class="pill">Local · Offline</div>
     </header>
@@ -476,12 +476,16 @@
           <label for="paperSelect">Paper</label>
           <select id="paperSelect"></select>
         </div>
+        <div>
+          <label for="teacherInput">Teacher</label>
+          <input type="text" id="teacherInput" placeholder="e.g. Roy sir" />
+        </div>
       </div>
 
       <button class="btn" id="addClassBtn">Add class</button>
 
       <div class="info-line">
-        Edit here if timetable changes.
+        Edit here if timetable or teacher changes.
       </div>
 
       <div class="editor-list" id="editorList"></div>
@@ -526,7 +530,7 @@
     }
   };
 
-  const STORAGE_KEY_ROUTINE = "sem3_weekly_routine_v1";
+  const STORAGE_KEY_ROUTINE = "sem3_weekly_routine_v2_teachers";
   const STORAGE_KEY_ATT = "sem3_mock_attendance_v1";
 
   function loadRoutine() {
@@ -543,7 +547,7 @@
 
   let weeklyRoutine = loadRoutine();
 
-  const specialByDate = {}; // still here if you ever want to extend it
+  const specialByDate = {};
 
   /*************************************************
    * 2. DATE HELPERS
@@ -580,7 +584,8 @@
       time: formatTimeRange(slot.start, slot.end),
       start: slot.start,
       end: slot.end,
-      paper: slot.paper
+      paper: slot.paper,
+      teacher: slot.teacher || ""
     }));
     return { list, mode: wd };
   }
@@ -713,8 +718,7 @@
       const { present, absent } = stats[paper];
       const total = present + absent;
       const pct = total ? Math.round((present / total) * 100) : 0;
-      const info = PAPERS[paper];
-      const label = info ? paper : paper;
+      const label = paper;
       html += `
         <tr>
           <td>${label}</td>
@@ -772,6 +776,7 @@
 
     list.forEach(slot => {
       const info = PAPERS[slot.paper] || { name: "Unknown", type: "", subjectGroup: "" };
+      const teacher = slot.teacher || "";
 
       const row = document.createElement("div");
       row.className = "class-row";
@@ -785,7 +790,7 @@
       const middle = document.createElement("div");
       middle.innerHTML = `
         <div class="subject-name">${info.name}</div>
-        <div class="meta">${info.type} · ${info.subjectGroup}</div>
+        <div class="meta">${info.type} · ${info.subjectGroup}${teacher ? " · " + teacher : ""}</div>
       `;
 
       const right = document.createElement("div");
@@ -834,6 +839,7 @@
   const endTime = document.getElementById("endTime");
   const addClassBtn = document.getElementById("addClassBtn");
   const editorList = document.getElementById("editorList");
+  const teacherInput = document.getElementById("teacherInput");
 
   function renderEditorList() {
     const day = editWeekday.value;
@@ -850,13 +856,14 @@
       .sort((a,b)=> (a.start||"") > (b.start||"") ? 1 : -1)
       .forEach((slot, index) => {
         const info = PAPERS[slot.paper] || { name: "Unknown", type: "" };
+        const teacher = slot.teacher || "";
         const div = document.createElement("div");
         div.className = "editor-item";
         const infoDiv = document.createElement("div");
         infoDiv.className = "editor-item-info";
         infoDiv.innerHTML = `
           <div>${formatTimeRange(slot.start, slot.end)} · <b>${slot.paper}</b></div>
-          <div style="color:#9ca3af;font-size:0.7rem;">${info.name}</div>
+          <div style="color:#9ca3af;font-size:0.7rem;">${info.name}${teacher ? " · " + teacher : ""}</div>
         `;
         const delBtn = document.createElement("button");
         delBtn.className = "chip-danger";
@@ -884,20 +891,23 @@
     const st = startTime.value || "";
     const et = endTime.value || "";
     const paper = paperSelect.value;
+    const teacher = teacherInput.value.trim();
 
     if (!paper) return;
 
     if (!weeklyRoutine[day]) weeklyRoutine[day] = [];
-    weeklyRoutine[day].push({ start: st, end: et, paper });
+    weeklyRoutine[day].push({ start: st, end: et, paper, teacher });
     saveRoutine(weeklyRoutine);
 
     startTime.value = "";
     endTime.value = "";
+    teacherInput.value = "";
 
     renderEditorList();
 
     if (datePicker.value && weekdayFromISO(datePicker.value) === day) {
       renderRoutineFor(datePicker.value);
+      buildAttendanceReport();
     }
   });
 
@@ -934,6 +944,7 @@
       datePicker.value = iso;
       renderRoutineFor(iso);
       highlightWeekday(w);
+      buildAttendanceReport();
     });
   });
 
@@ -952,6 +963,7 @@
     if (!iso) return;
     renderRoutineFor(iso);
     highlightWeekday(weekdayFromISO(iso));
+    buildAttendanceReport();
   });
 
   todayBtn.addEventListener("click", () => {
